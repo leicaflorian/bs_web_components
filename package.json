@@ -1,0 +1,32 @@
+{
+  "name": "bs-web-components",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "dist/components.es.js",
+  "exports": {
+    ".": "./dist/components.es.js"
+  },
+  "types": "dis/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && vue-tsc --emitDeclarationOnly"
+  },
+  "dependencies": {
+    "@types/node": "^18.0.0",
+    "@vitejs/plugin-vue": "^2.3.3",
+    "bootstrap": "^5.2.0-beta1",
+    "lit": "^2.2.5",
+    "rollup-plugin-lit-css": "^4.0.0",
+    "rollup-plugin-styles": "^4.0.0",
+    "vue": "^3.2.37"
+  },
+  "devDependencies": {
+    "sass": "^1.52.3",
+    "typescript": "^4.6.4",
+    "vite": "^2.9.12",
+    "vue-tsc": "^0.38.1"
+  }
+}

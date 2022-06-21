@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8"/>
+  <link rel="icon" type="image/svg+xml" href="/vite.svg"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vite + Lit + TS</title>
+
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0-beta1/css/bootstrap.min.css'
+        integrity='sha512-o/MhoRPVLExxZjCFVBsm17Pkztkzmh7Dp8k7/3JrtNCHh0AQ489kwpfA3dPSHzKDe8YCuEhxXq3Y71eb/o6amg=='
+        crossorigin='anonymous'/>
+
+  <!-- <link rel="stylesheet" href="./src/index.css" /> -->
+  <script type="module" src="/src/components/index.ts"></script>
+  <!--  <script type="module" src="dist/components.es.js"></script>-->
+
+  <style>
+      .container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+      }
+
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <div>
+    <h5>Buttons</h5>
+    <bwc-button variant="" type="submit" class="my-custom-class">
+      Click me!
+    </bwc-button>
+
+    <bwc-button id="btn-1" variant="danger" outline size="lg" href="#" toggle>Ciao come va?
+    </bwc-button>
+    <bwc-button variant="danger" outline href="#" toggle disabled>Ciao come va?
+    </bwc-button>
+  </div>
+  <div>
+    <h5>Select</h5>
+    <bwc-select></bwc-select>
+  </div>
+</div>
+
+<script>
+  const btn = document.getElementById('btn-1')
+
+</script>
+</body>
+
+</html>
+<script>
+  import BwcSelect from './src/components/Form/BwcSelect.ce.vue'
+  export default {
+    components: { BwcSelect }
+  }
+</script>
