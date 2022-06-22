@@ -12,7 +12,7 @@
 
 <script lang="ts">
 import { computed, ref } from '@vue/reactivity'
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, PropType, watch } from 'vue'
 
 type BtnVariants =
     | 'primary'
@@ -73,6 +73,7 @@ export default defineComponent({
     })
 
     function onClick () {
+      console.log(props)
       status.value = !status.value
     }
 
@@ -80,10 +81,6 @@ export default defineComponent({
 
     }
 
-    expose({
-      cssProperties,
-      status
-    })
     return {
       tag, classes, attrs, onClick,
       cssProperties

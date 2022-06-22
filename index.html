@@ -18,8 +18,10 @@
   <style>
       .container {
           display: flex;
-          align-items: center;
-          justify-content: center;
+          /*align-items: center;*/
+          /*justify-content: center;*/
+          flex-direction: column;
+          text-align: left;
           height: 100vh;
       }
 
@@ -28,7 +30,7 @@
 
 <body>
 <div class="container">
-  <div>
+  <div class="mb-5">
     <h5>Buttons</h5>
     <bwc-button variant="" type="submit" class="my-custom-class">
       Click me!
@@ -39,22 +41,55 @@
     <bwc-button variant="danger" outline href="#" toggle disabled>Ciao come va?
     </bwc-button>
   </div>
-  <div>
+
+  <div class="mb-5">
     <h5>Select</h5>
-    <bwc-select></bwc-select>
+    <div class="mb-3">
+
+    <bwc-select id="mySelect" label="my first select" name="email"
+                class=""
+                error-message="prova"
+                options='' value="opt2">
+    </bwc-select>
+    </div>
+
+    <bwc-select id="mySelect2" label="my first select" name="email"
+                class="mb-3"
+                floating-label
+                options='' value="opt1">
+      La mia lista
+    </bwc-select>
+
+
   </div>
 </div>
 
 <script>
-  const btn = document.getElementById('btn-1')
+  const mySelect = document.getElementById('mySelect')
+  const mySelect2 = document.getElementById('mySelect2')
+  const fakeData = [
+    {
+      text: 'Option 1',
+      value: 'opt1'
+    },{
+      text: 'Option 2',
+      value: 'opt2'
+    },{
+      text: 'Option 3',
+      value: 'opt3'
+    }
+  ]
+
+  mySelect.options = fakeData;
+  mySelect2.options = fakeData;
+
+  mySelect.addEventListener("change", function (e){
+    console.dir(e)
+  })
+
+  console.dir(mySelect)
 
 </script>
 </body>
 
 </html>
-<script>
-  import BwcSelect from './src/components/Form/BwcSelect.ce.vue'
-  export default {
-    components: { BwcSelect }
-  }
-</script>
