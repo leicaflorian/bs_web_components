@@ -11,9 +11,7 @@
         integrity='sha512-o/MhoRPVLExxZjCFVBsm17Pkztkzmh7Dp8k7/3JrtNCHh0AQ489kwpfA3dPSHzKDe8YCuEhxXq3Y71eb/o6amg=='
         crossorigin='anonymous'/>
 
-  <!-- <link rel="stylesheet" href="./src/index.css" /> -->
   <script type="module" src="/src/components/index.ts"></script>
-  <!--  <script type="module" src="dist/components.es.js"></script>-->
 
   <style>
       .container {
@@ -46,48 +44,55 @@
     <h5>Select</h5>
     <div class="mb-3">
 
-    <bwc-select id="mySelect" label="my first select" name="email"
-                class=""
-                error-message="prova"
-                options='' value="opt2">
-    </bwc-select>
+      <bwc-select id="mySelect" label="my first select" name="email"
+                  class=""
+                  error-message="prova"
+                  options='' value="opt2">
+      </bwc-select>
     </div>
 
-    <bwc-select id="mySelect2" label="my first select" name="email"
-                class="mb-3"
-                floating-label
-                options='' value="opt1">
-      La mia lista
-    </bwc-select>
+    <div class="mb-3">
+      <bwc-select id="mySelect2" label="my first select" name="email"
+                  class="mb-3"
+                  floating-label
+                  error-message="prova"
+                  options='' value="opt1">
+        La mia lista
+      </bwc-select>
+    </div>
 
+    <div class="mb-3">
+      <bwc-select id="mySelect3" label="Multiple selection" name="email" multiple show-control-el options=''
+                  clearable></bwc-select>
+    </div>
 
   </div>
 </div>
 
 <script>
-  const mySelect = document.getElementById('mySelect')
-  const mySelect2 = document.getElementById('mySelect2')
+  const bwcSelectElements = document.querySelectorAll('bwc-select')
   const fakeData = [
     {
       text: 'Option 1',
       value: 'opt1'
-    },{
+    }, {
       text: 'Option 2',
       value: 'opt2'
-    },{
+    }, {
       text: 'Option 3',
       value: 'opt3'
     }
   ]
 
-  mySelect.options = fakeData;
-  mySelect2.options = fakeData;
+  bwcSelectElements.forEach(el => {
 
-  mySelect.addEventListener("change", function (e){
-    console.dir(e)
+    el.options = fakeData
+
+    el.addEventListener('change', function (e) {
+      console.dir(e.detail)
+    })
+
   })
-
-  console.dir(mySelect)
 
 </script>
 </body>

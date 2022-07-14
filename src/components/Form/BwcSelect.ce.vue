@@ -85,7 +85,7 @@ export default defineComponent({
     floatingLabel: Boolean,
     errorMessage: String,
     multiple: Boolean,
-    value: String,
+    value: [String, Array],
     size: String as PropType<'sm' | 'lg'>,
     options: [String, Array],
     optionLabelKey: { type: String, default: 'text' },
@@ -210,29 +210,42 @@ export default defineComponent({
       }
 
       const changedOption = option[props.optionValueKey]
-      const newSelection: any[] = selectedOptions.value
+      const newSelection: any[] = !props.multiple ? [] : selectedOptions.value
+      const optionAlreadySelected = selectedOptions.value.findIndex((el) => el[props.optionValueKey] === changedOption)
 
-      /*
-        * If the option is already selected, remove it from the selection.
-        * otherwise add it to the selection
-        *
-        * Cycle through the selection and push in the newSelection array only the right option,
-        * handling the case where the option is already selected, then remove it from the selection.
-       */
+      if (optionAlreadySelected === -1) {
+        newSelection.push(optionsList.value.find((el) => el[props.optionValueKey] === changedOption))
+      } else {
+        newSelection.splice(optionAlreadySelected, 1)
+      }
+
+      const toEmit = props.multiple ? newSelection.reduce((acc, curr) => {
+        acc.push(curr[props.optionValueKey])
+
+        return acc
+      }, []) : newSelection[0]?.value
 
       context.emit('update:modelValue', {
-        value: changedOption,
-        options: option
+        value: toEmit,
+        options: newSelection
       })
 
-      context.emit('change', changedOption)
+      context.emit('change', {
+        value: toEmit,
+        options: newSelection
+      })
     }
 
     /**
      * Clear the selection of the dropdown.
      */
     function clearSelection () {
-      onOptionChange({})
+      context.emit('update:modelValue', {
+        value: props.multiple ? [] : '',
+        options: null
+      })
+
+      context.emit('change')
     }
 
     context.expose({
