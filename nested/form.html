@@ -35,8 +35,7 @@
     AXAJ call
   </p>
 
-  <bwc-form class="test" action="/" method="post">
-
+  <bwc-form class="test" action="/" method="get">
     <div>
       <input type="text" name="title">
     </div>
@@ -44,6 +43,15 @@
     <div>
       <input type="text" name="subTitle">
     </div>
+
+    <textarea name="contenuto"></textarea>
+
+    <select name="lista" >
+      <option value=""></option>
+      <option value="pane">pane</option>
+      <option value="pasta" selected>pasta</option>
+      <option value="uova">uova</option>
+    </select>
 
     <button class="btn btn-primary" type="submit">Invia</button>
     <button class="btn btn-secondary" type="reset">Reset</button>

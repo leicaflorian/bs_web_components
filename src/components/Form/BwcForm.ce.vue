@@ -15,10 +15,13 @@ import {
   computed,
   onMounted,
   PropType, reactive,
-  Ref, triggerRef, watch, watchEffect
+  Ref, watch
 } from 'vue'
 import { FormSubmitMethod } from '../../enums/FormSubmitMethod'
 import { ref } from '@vue/reactivity'
+
+type CustomHTMLElement = HTMLInputElement & { initialValue: string }
+type ValidHTMLInputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | CustomHTMLElement;
 
 export default {
   name: 'BwcForm.ce',
@@ -34,16 +37,37 @@ export default {
     }
   },
   setup (props, ctx) {
+    /**
+     * Internal HTMLFormElement
+     */
     const formEl: Ref<HTMLFormElement | undefined> = ref()
-    const formInputs: Ref<HTMLElement[]> = ref([])
-    const formSubmitBtn = ref()
-    const formResetBtn = ref()
-    const slotContent = ref()
-    const submitMethod = computed(() => {
-      return (props.method !== FormSubmitMethod.GET) ? FormSubmitMethod.POST : FormSubmitMethod.GET
-    })
 
+    /**
+     * Array of HTMLElement containing all the inputs of the form
+     */
+    const formInputs: Ref<ValidHTMLInputElement[]> = ref([])
+
+    /**
+     * HTMLButtonElement of the submit button
+     */
+    const formSubmitBtn = ref()
+
+    /**
+     * HTMLButtonElement of the reset button
+     */
+    const formResetBtn = ref()
+
+    /**
+     * Reactive object containing the form data.
+     */
     const formData = ref({})
+
+    /**
+     * The HTTP method that must be used for the form
+     */
+    const submitMethod = computed(() => {
+      return (props.method?.toUpperCase() !== FormSubmitMethod.GET) ? FormSubmitMethod.POST : FormSubmitMethod.GET
+    })
 
     function onSubmit () {
       if (props.ajaxSubmit) {
@@ -54,16 +78,15 @@ export default {
         })
 
         // TODO:: must implement
-      } else {
-        formEl.value?.submit()
+        return alert('work in progress...')
       }
 
-      console.log(formInputs.value)
+      formEl.value?.submit()
     }
 
     function onReset () {
       formInputs.value?.forEach(el => {
-        el.value = el.initialValue
+        el.value = 'initialValue' in el ? el.initialValue : ''
         el.dispatchEvent(new CustomEvent('change'))
       })
 
@@ -73,7 +96,7 @@ export default {
     function storeInputs () {
       const shadowRoot = formEl.value?.parentNode as DocumentFragment
       const slots: NodeListOf<HTMLSlotElement> = shadowRoot?.querySelectorAll('slot')
-      const _inputs: Array<HTMLButtonElement | HTMLElement> = []
+      const _inputs: Array<ValidHTMLInputElement> = []
 
       slots.forEach(slot => {
         const slotElements = slot.assignedElements()
@@ -84,11 +107,13 @@ export default {
 
       formSubmitBtn.value = _inputs.find(el => 'type' in el && el.type === 'submit')
       formResetBtn.value = _inputs.find(el => 'type' in el && el.type === 'reset')
-      formInputs.value = _inputs.filter(el => el.hasAttribute('name')).map(el => reactive(el))
+      formInputs.value = _inputs.filter(el => el.hasAttribute('name'))
     }
 
     function createHiddenInputs () {
-      formEl.value?.querySelectorAll('[temp-input]').forEach(el => el.remove())
+      if (formEl.value instanceof HTMLFormElement) {
+        formEl.value.querySelectorAll('[temp-input]').forEach(el => el.remove())
+      }
 
       formInputs.value.forEach(el => {
         const input = document.createElement('input')
@@ -101,19 +126,19 @@ export default {
       })
     }
 
-    function addListener (el, callback) {
-      if (el.listenerAdded) {
-        return
+    function addWatchers () {
+      function addListener (el, callback) {
+        if (el.listenerAdded) {
+          return
+        }
+
+        callback(el)
+
+        Object.defineProperty(el, 'listenerAdded', {
+          value: true
+        })
       }
 
-      callback(el)
-
-      Object.defineProperty(el, 'listenerAdded', {
-        value: true
-      })
-    }
-
-    function addWatchers () {
       // Watch formEl and add slotchange event listener
       watch(() => formEl.value, (form: HTMLFormElement) => {
         addListener(form, (form) => {
@@ -127,7 +152,7 @@ export default {
       })
 
       // Watch for new available inputs
-      watch(() => formInputs.value, (inputs: HTMLElement[]) => {
+      watch(() => formInputs.value, (inputs: ValidHTMLInputElement[]) => {
         inputs.forEach(el => {
           Object.defineProperty(el, 'initialValue', {
             value: el.value
@@ -170,10 +195,14 @@ export default {
       })
 
       // Watch for formData changes to update  hidden fields values
-      watch(() => formData.value, (val) => {
-        Object.keys(val).forEach(key => {
-          if (formEl.value.elements[key]) {
-            formEl.value.elements[key].value = val[key]
+      watch(() => formData.value, (el: any) => {
+        Object.keys(el).forEach(key => {
+          if (formEl.value && 'elements' in formEl.value) {
+            const elements: HTMLFormControlsCollection | undefined = formEl.value?.elements
+
+            if (elements && elements[key]) {
+              elements[key].value = el[key]
+            }
           }
         })
 
@@ -191,7 +220,6 @@ export default {
       formEl,
       submitMethod,
       onSubmit,
-      slotContent,
       formData
     }
   }
