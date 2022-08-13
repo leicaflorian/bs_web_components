@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8"/>
+  <link rel="icon" type="image/svg+xml" href="/vite.svg"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BWC - Form</title>
+
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0-beta1/css/bootstrap.min.css'
+        integrity='sha512-o/MhoRPVLExxZjCFVBsm17Pkztkzmh7Dp8k7/3JrtNCHh0AQ489kwpfA3dPSHzKDe8YCuEhxXq3Y71eb/o6amg=='
+        crossorigin='anonymous'/>
+
+  <script type="module" src="/src/components/index.ts"></script>
+
+  <style>
+      .container {
+          display: flex;
+          flex-direction: column;
+          text-align: left;
+          height: 100vh;
+      }
+
+      .test {
+          padding-left: 40px;
+      }
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <h1>BWC Form</h1>
+  <p class="lead">
+    This component must have the same functions as a normal form with also the ability to submit the form through an
+    AXAJ call
+  </p>
+
+  <bwc-form class="test" action="/" method="post">
+
+    <div>
+      <input type="text" name="title">
+    </div>
+
+    <div>
+      <input type="text" name="subTitle">
+    </div>
+
+    <button class="btn btn-primary" type="submit">Invia</button>
+    <button class="btn btn-secondary" type="reset">Reset</button>
+  </bwc-form>
+</div>
+</body>
+</html>

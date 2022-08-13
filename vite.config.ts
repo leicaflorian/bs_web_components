@@ -12,6 +12,10 @@ export default defineConfig({
       fileName: format => `components.${format}.js`
     },
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        nested: resolve(__dirname, 'nested/form.html')
+      }
       // external: ['vue', '@vueuse/core']
     }
   },

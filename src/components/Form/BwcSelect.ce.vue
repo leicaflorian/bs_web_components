@@ -249,7 +249,8 @@ export default defineComponent({
     }
 
     context.expose({
-      selectedOptions
+      selectedOptions,
+      clearSelection
     })
 
     return {
