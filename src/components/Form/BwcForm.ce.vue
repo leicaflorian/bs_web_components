@@ -4,7 +4,8 @@
         v-bind="$attrs"
         ref="formEl">
     <!-- For Laravel forms -->
-    <input type="hidden" name="_method" :value="method">
+    <input type="hidden" name="_method" :value="method"
+           v-if="showMethodInput">
 
     <slot></slot>
   </form>
@@ -12,19 +13,26 @@
 
 <script lang="ts">
 import {
-  computed,
+  computed, ComputedRef,
   onMounted,
   PropType, reactive,
-  Ref, watch
+  Ref, toRaw, watch
 } from 'vue'
 import { FormSubmitMethod } from '../../enums/FormSubmitMethod'
 import { ref } from '@vue/reactivity'
+import { validateAll as indicatorValidate } from 'indicative/validator'
 
-type CustomHTMLElement = HTMLInputElement & { initialValue: string }
+type CustomHTMLElement = HTMLInputElement & { initialValue: string, validationRules: string, formEl: HTMLFormElement }
 type ValidHTMLInputElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | CustomHTMLElement;
 
+export interface ValidationError {
+  field: string;
+  message: string;
+  validation: string;
+}
+
 export default {
-  name: 'BwcForm.ce',
+  name: 'BwcForm',
   props: {
     method: {
       type: String as PropType<FormSubmitMethod>,
@@ -50,31 +58,66 @@ export default {
     /**
      * HTMLButtonElement of the submit button
      */
-    const formSubmitBtn = ref()
+    const formSubmitBtn: Ref<HTMLButtonElement | undefined> = ref()
 
     /**
      * HTMLButtonElement of the reset button
      */
-    const formResetBtn = ref()
+    const formResetBtn: Ref<HTMLButtonElement | undefined> = ref()
 
     /**
      * Reactive object containing the form data.
      */
-    const formData = ref({})
+    const formData: Ref<any> = ref({})
+
+    const validationErrors: Ref<ValidationError[]> = ref([])
 
     /**
      * The HTTP method that must be used for the form
      */
-    const submitMethod = computed(() => {
+    const submitMethod: ComputedRef<FormSubmitMethod.GET | FormSubmitMethod.POST> = computed(() => {
       return (props.method?.toUpperCase() !== FormSubmitMethod.GET) ? FormSubmitMethod.POST : FormSubmitMethod.GET
     })
 
-    function onSubmit () {
+    const showMethodInput = computed(() => {
+      if (!props.method) {
+        return
+      }
+
+      return ![FormSubmitMethod.GET, FormSubmitMethod.POST].includes(props.method as any)
+    })
+
+    const validationRules = computed(() => {
+      const rules = {}
+
+      formInputs.value?.forEach(el => {
+        if ('validationRules' in el && el.validationRules) {
+          rules[el.name] = el.validationRules
+        }
+      })
+
+      return rules
+    })
+
+    /**
+     * Function triggered by the form submit
+     *
+     * @return Promise<void>
+     */
+    async function onSubmit () {
+      const validatedData = await validate()
+
+      if (!validatedData) {
+        return
+      }
+
+      return
+
       if (props.ajaxSubmit) {
-        const formData = new FormData(formEl.value)
+        const formDataI = new FormData(formData.value)
 
         formInputs.value.forEach(el => {
-          formData.append(el.getAttribute('name'), el.value)
+          formDataI.append(el.getAttribute('name'), el.value)
         })
 
         // TODO:: must implement
@@ -84,7 +127,12 @@ export default {
       formEl.value?.submit()
     }
 
-    function onReset () {
+    /**
+     * Function triggered when clicking a reset button, if any
+     *
+     * @return void
+     */
+    function onReset (): void {
       formInputs.value?.forEach(el => {
         el.value = 'initialValue' in el ? el.initialValue : ''
         el.dispatchEvent(new CustomEvent('change'))
@@ -93,7 +141,37 @@ export default {
       formEl.value?.reset()
     }
 
-    function storeInputs () {
+    async function validate (): Promise<any> {
+      let hasErrors = false
+      let data
+
+      validationErrors.value = []
+
+      try {
+        data = await indicatorValidate(formData.value, validationRules.value)
+      } catch (er: ValidationError[]) {
+        validationErrors.value.push(...er)
+
+        hasErrors = true
+      }
+
+      ctx.emit('formValidated', {
+        errors: toRaw(validationErrors.value),
+        hasErrors
+      })
+
+      return data
+    }
+
+    /**
+     *  Get all form elements provided by the slot tag and stores them inside different variables
+     *  - formSubmitBtn
+     *  - formResetBtn
+     *  - formInputs
+     *
+     * @return void
+     */
+    function storeInputs (): void {
       const shadowRoot = formEl.value?.parentNode as DocumentFragment
       const slots: NodeListOf<HTMLSlotElement> = shadowRoot?.querySelectorAll('slot')
       const _inputs: Array<ValidHTMLInputElement> = []
@@ -105,12 +183,33 @@ export default {
         _inputs.push(...parentNode.querySelectorAll('[name],[type=submit],[type=reset]'))
       })
 
+      // is done just for allowing inputs to access the form they belong to
+      _inputs.forEach(input => {
+        input.formEl = formEl.value
+        input.bwcForm = shadowRoot.host
+
+        input.dispatchEvent(new CustomEvent('bindsFormEl', {
+          detail: {
+            form: input.formEl,
+            bwcForm: input.bwcForm
+          }
+        }))
+      })
+
       formSubmitBtn.value = _inputs.find(el => 'type' in el && el.type === 'submit')
       formResetBtn.value = _inputs.find(el => 'type' in el && el.type === 'reset')
       formInputs.value = _inputs.filter(el => el.hasAttribute('name'))
     }
 
-    function createHiddenInputs () {
+    /**
+     * All the inputs provided by the user in the default slot must be cloned as "hidden" inside the form
+     * otherwise the form won't be able to submit and read all its data as it would work by default.
+     *
+     * This is non the case when the form is submitted by Ajax.
+     *
+     * @returns void
+     */
+    function createHiddenInputs (): void {
       if (formEl.value instanceof HTMLFormElement) {
         formEl.value.querySelectorAll('[temp-input]').forEach(el => el.remove())
       }
@@ -126,7 +225,12 @@ export default {
       })
     }
 
-    function addWatchers () {
+    /**
+     * Adds all necessary watchers for handling the form and its elements
+     *
+     * @returns void
+     */
+    function addWatchers (): void {
       function addListener (el, callback) {
         if (el.listenerAdded) {
           return
@@ -139,7 +243,7 @@ export default {
         })
       }
 
-      // Watch formEl and add slotchange event listener
+      // Watch formEl and add "slotchange" event listener
       watch(() => formEl.value, (form: HTMLFormElement) => {
         addListener(form, (form) => {
           form.addEventListener('slotchange', function () {
@@ -154,9 +258,11 @@ export default {
       // Watch for new available inputs
       watch(() => formInputs.value, (inputs: ValidHTMLInputElement[]) => {
         inputs.forEach(el => {
-          Object.defineProperty(el, 'initialValue', {
-            value: el.value
-          })
+          if (!('initialValue' in el)) {
+            Object.defineProperty(el, 'initialValue', {
+              value: el.value
+            })
+          }
 
           formData.value[el.name] = el.value
 
@@ -212,6 +318,13 @@ export default {
 
     }
 
+    // Expose necessary props or methods
+    ctx.expose({
+      validationErrors,
+      validationRules,
+      validate
+    })
+
     onMounted(() => {
       addWatchers()
     })
@@ -220,7 +333,9 @@ export default {
       formEl,
       submitMethod,
       onSubmit,
-      formData
+      formData,
+      FormSubmitMethod,
+      showMethodInput
     }
   }
 }

@@ -27,7 +27,6 @@ export function defineCustomElement (Comp: any, hydrate?: any): VueElementConstr
       super.connectedCallback()
       
       this.exposeNecessaryKeys()
-      
     }
     
     exposeNecessaryKeys () {
@@ -41,14 +40,19 @@ export function defineCustomElement (Comp: any, hydrate?: any): VueElementConstr
       const keys = Object.keys(toExpose)
       
       keys.forEach(key => {
-        
         //TODO:: must handle function type properties
         
-        Object.defineProperty(this, key, {
-          get (): any {
-            return toExpose[key].value
-          }
-        })
+        if (toExpose[key] instanceof Function) {
+          Object.defineProperty(this, key, {
+            value: toExpose[key]
+          })
+        } else {
+          Object.defineProperty(this, key, {
+            get (): any {
+              return toExpose[key].value
+            }
+          })
+        }
       })
     }
     

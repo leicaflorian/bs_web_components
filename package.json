@@ -18,6 +18,7 @@
     "@types/node": "^18.0.0",
     "@vitejs/plugin-vue": "^2.3.3",
     "bootstrap": "^5.2.0-beta1",
+    "indicative": "^7.4.4",
     "lit": "^2.2.5",
     "rollup-plugin-lit-css": "^4.0.0",
     "rollup-plugin-styles": "^4.0.0",
