@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8"/>
+  <link rel="icon" type="image/svg+xml" href="/vite.svg"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BWC - Form</title>
+
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.0-beta1/css/bootstrap.min.css'
+        integrity='sha512-o/MhoRPVLExxZjCFVBsm17Pkztkzmh7Dp8k7/3JrtNCHh0AQ489kwpfA3dPSHzKDe8YCuEhxXq3Y71eb/o6amg=='
+        crossorigin='anonymous'/>
+
+  <link rel="stylesheet" href="/src/styles/components.scss">
+  <script type="module" src="/src/components/index.ts"></script>
+
+  <style>
+      .container {
+          display: flex;
+          flex-direction: column;
+          text-align: left;
+          height: 100vh;
+      }
+
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <h1>BWC Input</h1>
+  <p class="lead">
+    This component is a classic Html Input with some other functions like internal label floating label
+  </p>
+
+  <bwc-form>
+    <bwc-input class="mb-3" name="firstName" label="First Name" validation-rules="required|min:4" show-valid-feedback></bwc-input>
+    <bwc-input class="mb-3" name="pippo" label="Pippo" validation-rules="required"></bwc-input>
+    <bwc-input class="mb-3" name="lastName" label="Floating label" floating-label show-valid-feedback
+               valid-feedback="brvissimo"></bwc-input>
+
+    <bwc-input class="mb-3" name="lastName" label="Size sm" size="sm"></bwc-input>
+    <bwc-input class="mb-3" name="lastName" label="Size Lg" size="lg"></bwc-input>
+
+    <bwc-input class="mb-3" name="email" label="Readonly" readonly></bwc-input>
+    <bwc-input class="mb-3" name="email" label="Disabled" disabled=""></bwc-input>
+    <bwc-input class="mb-3" name="email" label="Readonly & disabled" readonly disabled></bwc-input>
+    <bwc-input class="mb-3" name="email" label="Readonly & plaintext" readonly plaintext></bwc-input>
+
+    <button class="btn btn-primary" type="submit">Invia</button>
+    <button class="btn btn-secondary" type="reset">Reset</button>
+  </bwc-form>
+
+  <script>
+    const form = document.querySelector('bwc-form')
+    const elements = document.querySelectorAll('bwc-input')
+
+    form.addEventListener('formValidated', function (e) {
+      console.log(form.validationErrors)
+    })
+
+    elements.forEach(el => {
+      el.addEventListener('change', function (e) {
+        // console.log(e)
+        console.log('Change', el.name, '->', el.value)
+      })
+
+      el.addEventListener('input', function (e) {
+        const originalEvent = e.detail[0].originalEvent
+
+        // console.log(e)
+        console.log('Input', originalEvent.currentTarget.name, '->', el.value)
+      })
+    })
+  </script>
+</div>
+</body>
+</html>

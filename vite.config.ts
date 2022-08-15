@@ -7,16 +7,16 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/components/index.ts'),
-      formats: ['es', "umd", "cjs", "iife"],
-      name: "pippo",
+      formats: ['es', 'umd', 'cjs', 'iife'],
+      name: 'pippo',
       fileName: format => `components.${format}.js`
     },
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        nested: resolve(__dirname, 'nested/form.html')
-      }
-      // external: ['vue', '@vueuse/core']
+        nested: resolve(__dirname, 'pages/**.*.html')
+      },
+      external: ['vue', '@vueuse/core']
     }
   },
   plugins: [
@@ -25,7 +25,7 @@ export default defineConfig({
         compilerOptions: {
           // treat all tags with a dash as custom elements
           // @ts-ignore
-          isCustomElement: (tag) => tag.includes('-')
+          isCustomElement: (tag) => tag.toLowerCase().startsWith('bwc')
         }
       }
     })
